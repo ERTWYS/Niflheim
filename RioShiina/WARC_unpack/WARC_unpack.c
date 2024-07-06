@@ -1,5 +1,5 @@
 /*
-ÓÃÓÚ½â°üÎÄ¼şÍ·ÎªWARC 1.7µÄWARÎÄ¼ş
+ç”¨äºè§£åŒ…æ–‡ä»¶å¤´ä¸ºWARC 1.7çš„WARæ–‡ä»¶
 made by Darkness-TX
 2018.05.04
 */
@@ -7,6 +7,7 @@ made by Darkness-TX
 #include "WARC_Decompress.h"
 #include <png.h>
 #define PI 3.1415926535897931
+
 
 typedef unsigned char  unit8;
 typedef unsigned short unit16;
@@ -27,27 +28,27 @@ struct warc_info {
 	unit32 flags;
 } WARC_Info[5000];
 
-unit32 FileNum = 0;//×ÜÎÄ¼şÊı£¬³õÊ¼¼ÆÊıÎª0
+unit32 FileNum = 0;//æ€»æ–‡ä»¶æ•°ï¼Œåˆå§‹è®¡æ•°ä¸º0
 
 unit32 Rand = 0;
 char WARC_key[MAX_PATH];
-unit32 Version = 0;//BRÊÇ2.48°æ±¾,2480»òÕß0x9B0,SJÊÇ2.50°æ±¾»òÕß0x9C4
-unit8 *RioShiinaImage = NULL;//RioShiinaÍ¼Æ¬
-unit8 *Region = NULL;//RioShiina2.pngµÄBGRAÅÅÁĞ
-unit8 *Extra = NULL;//¹îÒìµÄ¶«Î÷
+unit32 Version = 0;//BRæ˜¯2.48ç‰ˆæœ¬,2480æˆ–è€…0x9B0,SJæ˜¯2.50ç‰ˆæœ¬æˆ–è€…0x9C4
+unit8 *RioShiinaImage = NULL;//RioShiinaå›¾ç‰‡
+unit8 *Region = NULL;//RioShiina2.pngçš„BGRAæ’åˆ—
+unit8 *Extra = NULL;//è¯¡å¼‚çš„ä¸œè¥¿
 /*
-µÚÈıÕÅÍ¼£¬ÂÌµ×ÂãÅ®£¬²»ÖªÊÇÄÄ¸öÉµŒÅµÄÓ²ÅÌÖĞ·­³öÀ´µÄ£¬
-2.50°æ±¾³öÏÖ£¬²»ÖªµÀÆäËûÊÇ·ñÍ¨ÓÃ£¬½âÃÜºÍÖ®Ç°µÄËã·¨²î²»¶à£¬
-²»¹ıÖ±½ÓÔÚexeÖĞËÑË÷PNGÍ·Ã»ÓĞÕÒµ½£¬´Óº¯ÊıµÄµ÷ÓÃÀ´¿´»òĞíÊÇÔËĞĞÊ±¶¯Ì¬½âÑ¹µ½ÄÚ´æµÄ£¬
-ÅĞ¶Ï·½·¨ÊÇËÑË÷push 202ºÍpush 204£¬¸ú×Ùpush 202ÄÇ¸ö£¬
-È»ºó»áµ÷ÓÃGetProcAddressÖ®ºóÌø×ªµ½ÁËÄÚ´æÖĞµÄ½âÃÜº¯Êı¡£
-·³µÄÒ»Æ¥£¬ÊµÔÚÃ»Ê²Ã´¿ÉËµµÄ£¬…½Êº£¡£¡£¡
+ç¬¬ä¸‰å¼ å›¾ï¼Œç»¿åº•è£¸å¥³ï¼Œä¸çŸ¥æ˜¯å“ªä¸ªå‚»å±Œçš„ç¡¬ç›˜ä¸­ç¿»å‡ºæ¥çš„ï¼Œ
+2.50ç‰ˆæœ¬å‡ºç°ï¼Œä¸çŸ¥é“å…¶ä»–æ˜¯å¦é€šç”¨ï¼Œè§£å¯†å’Œä¹‹å‰çš„ç®—æ³•å·®ä¸å¤šï¼Œ
+ä¸è¿‡ç›´æ¥åœ¨exeä¸­æœç´¢PNGå¤´æ²¡æœ‰æ‰¾åˆ°ï¼Œä»å‡½æ•°çš„è°ƒç”¨æ¥çœ‹æˆ–è®¸æ˜¯è¿è¡Œæ—¶åŠ¨æ€è§£å‹åˆ°å†…å­˜çš„ï¼Œ
+åˆ¤æ–­æ–¹æ³•æ˜¯æœç´¢push 202å’Œpush 204ï¼Œè·Ÿè¸ªpush 202é‚£ä¸ªï¼Œ
+ç„¶åä¼šè°ƒç”¨GetProcAddressä¹‹åè·³è½¬åˆ°äº†å†…å­˜ä¸­çš„è§£å¯†å‡½æ•°ã€‚
+çƒ¦çš„ä¸€åŒ¹ï¼Œå®åœ¨æ²¡ä»€ä¹ˆå¯è¯´çš„ï¼Œå”å±ï¼ï¼ï¼
 */
 unit8 *ExtraImage = NULL;
 unit32 Seed = 0;
 unit32 key_src[5] = { 0, 0, 0, 0, 0 };
-/*flag & 0x40000000 == 1Ê±ÒªÓÃµ½£¬µ«ÊÇÓĞĞ©Ê±ºòÓÖ²»ĞèÒª£¬ºÜÆæÌØ£¬ËÑ0x40000000È»ºóÌø×ª£¬
-ÆäÖĞÓĞ¿é0x2000µÄÄÚ´æ£¬¾ÍÊÇTMµÄdecrypt2ËùÔÚµÄÄÇ¿éÄÚ´æ£¬¾øÁË
+/*flag & 0x40000000 == 1æ—¶è¦ç”¨åˆ°ï¼Œä½†æ˜¯æœ‰äº›æ—¶å€™åˆä¸éœ€è¦ï¼Œå¾ˆå¥‡ç‰¹ï¼Œæœ0x40000000ç„¶åè·³è½¬ï¼Œ
+å…¶ä¸­æœ‰å—0x2000çš„å†…å­˜ï¼Œå°±æ˜¯TMçš„decrypt2æ‰€åœ¨çš„é‚£å—å†…å­˜ï¼Œç»äº†
 */
 unit8 *DecodeBin = NULL;
 
@@ -97,20 +98,20 @@ void ReadPng(FILE* src)
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (png_ptr == NULL)
 	{
-		printf("PNGĞÅÏ¢´´½¨Ê§°Ü!\n");
+		printf("PNGä¿¡æ¯åˆ›å»ºå¤±è´¥!\n");
 		exit(0);
 	}
 	info_ptr = png_create_info_struct(png_ptr);
 	if (info_ptr == NULL)
 	{
-		printf("infoĞÅÏ¢´´½¨Ê§°Ü!\n");
+		printf("infoä¿¡æ¯åˆ›å»ºå¤±è´¥!\n");
 		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
 		exit(0);
 	}
 	end_ptr = png_create_info_struct(png_ptr);
 	if (end_ptr == NULL)
 	{
-		printf("endĞÅÏ¢´´½¨Ê§°Ü!\n");
+		printf("endä¿¡æ¯åˆ›å»ºå¤±è´¥!\n");
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 		exit(0);
 	}
@@ -136,7 +137,7 @@ void ReadPng(FILE* src)
 	}
 	else
 	{
-		printf("Region¿éµÄÍ¼Æ¬²»ÊÇbppÎª8»ò²»ÊÇ32Î»RGBAÍ¼Æ¬£¬²»·ûºÏ¹æ·¶£¡\n");
+		printf("Regionå—çš„å›¾ç‰‡ä¸æ˜¯bppä¸º8æˆ–ä¸æ˜¯32ä½RGBAå›¾ç‰‡ï¼Œä¸ç¬¦åˆè§„èŒƒï¼\n");
 		system("pause");
 		exit(0);
 	}
@@ -154,7 +155,7 @@ void Init()
 	wsprintfW(iniPath, L"%ls\\%ls", dirPath, L"RioShiina.ini");
 	if (_waccess(iniPath, 4) == -1)
 	{
-		wprintf(L"³õÊ¼»¯Ê§°Ü£¬ÇëÈ·ÈÏÄ¿Â¼ÏÂÊÇ·ñº¬ÓĞRioShiina.ini\n");
+		wprintf(L"åˆå§‹åŒ–å¤±è´¥ï¼Œè¯·ç¡®è®¤ç›®å½•ä¸‹æ˜¯å¦å«æœ‰RioShiina.ini\n");
 		system("pause");
 		exit(0);
 	}
@@ -174,7 +175,7 @@ void Init()
 	GetPrivateProfileStringW(L"Image", L"RioShiinaImage", L"", filePath, MAX_PATH, iniPath);
 	if (wcscmp(filePath, L"") == 0)
 	{
-		wprintf(L"³õÊ¼»¯Í¼Æ¬Ê§°Ü£¬ÇëÈ·ÈÏRioShiina.iniÖĞRioShiinaImageÊôĞÔÊÇ·ñÓĞÖµ\n");
+		wprintf(L"åˆå§‹åŒ–å›¾ç‰‡å¤±è´¥ï¼Œè¯·ç¡®è®¤RioShiina.iniä¸­RioShiinaImageå±æ€§æ˜¯å¦æœ‰å€¼\n");
 		system("pause");
 		exit(0);
 	}
@@ -182,7 +183,7 @@ void Init()
 	src = _wfopen(filePath, L"rb");
 	if (src == NULL)
 	{
-		wprintf(L"³õÊ¼»¯Í¼Æ¬Ê§°Ü£¬ÇëÈ·ÈÏÄ¿Â¼ÏÂÊÇ·ñº¬ÓĞ%ls\n", filePath);
+		wprintf(L"åˆå§‹åŒ–å›¾ç‰‡å¤±è´¥ï¼Œè¯·ç¡®è®¤ç›®å½•ä¸‹æ˜¯å¦å«æœ‰%ls\n", filePath);
 		system("pause");
 		exit(0);
 	}
@@ -195,7 +196,7 @@ void Init()
 	GetPrivateProfileStringW(L"Image", L"Region", L"", filePath, MAX_PATH, iniPath);
 	if (wcscmp(filePath, L"") == 0)
 	{
-		wprintf(L"³õÊ¼»¯Í¼Æ¬Ê§°Ü£¬ÇëÈ·ÈÏRioShiina.iniÖĞRegionÊôĞÔÊÇ·ñÓĞÖµ\n");
+		wprintf(L"åˆå§‹åŒ–å›¾ç‰‡å¤±è´¥ï¼Œè¯·ç¡®è®¤RioShiina.iniä¸­Regionå±æ€§æ˜¯å¦æœ‰å€¼\n");
 		system("pause");
 		exit(0);
 	}
@@ -203,7 +204,7 @@ void Init()
 	src = _wfopen(filePath, L"rb");
 	if (src == NULL)
 	{
-		wprintf(L"³õÊ¼»¯Í¼Æ¬Ê§°Ü£¬ÇëÈ·ÈÏÄ¿Â¼ÏÂÊÇ·ñº¬ÓĞ%ls\n", filePath);
+		wprintf(L"åˆå§‹åŒ–å›¾ç‰‡å¤±è´¥ï¼Œè¯·ç¡®è®¤ç›®å½•ä¸‹æ˜¯å¦å«æœ‰%ls\n", filePath);
 		system("pause");
 		exit(0);
 	}
@@ -217,7 +218,7 @@ void Init()
 		GetPrivateProfileStringW(L"Image", L"ExtraImage", L"", filePath, MAX_PATH, iniPath);
 		if (wcscmp(filePath, L"") == 0)
 		{
-			wprintf(L"³õÊ¼»¯Í¼Æ¬Ê§°Ü£¬ÇëÈ·ÈÏRioShiina.iniÖĞExtraImageÊôĞÔÊÇ·ñÓĞÖµ\n");
+			wprintf(L"åˆå§‹åŒ–å›¾ç‰‡å¤±è´¥ï¼Œè¯·ç¡®è®¤RioShiina.iniä¸­ExtraImageå±æ€§æ˜¯å¦æœ‰å€¼\n");
 			system("pause");
 			exit(0);
 		}
@@ -225,7 +226,7 @@ void Init()
 		src = _wfopen(filePath, L"rb");
 		if (src == NULL)
 		{
-			wprintf(L"³õÊ¼»¯Í¼Æ¬Ê§°Ü£¬ÇëÈ·ÈÏÄ¿Â¼ÏÂÊÇ·ñº¬ÓĞ%ls\n", filePath);
+			wprintf(L"åˆå§‹åŒ–å›¾ç‰‡å¤±è´¥ï¼Œè¯·ç¡®è®¤ç›®å½•ä¸‹æ˜¯å¦å«æœ‰%ls\n", filePath);
 			system("pause");
 			exit(0);
 		}
@@ -238,7 +239,7 @@ void Init()
 		GetPrivateProfileStringW(L"RioShiina", L"DecodeBin", L"", filePath, MAX_PATH, iniPath);
 		if (wcscmp(filePath, L"") == 0)
 		{
-			wprintf(L"³õÊ¼»¯Ê§°Ü£¬ÇëÈ·ÈÏRioShiina.iniÖĞDecodeBinÊôĞÔÊÇ·ñÓĞÖµ\n");
+			wprintf(L"åˆå§‹åŒ–å¤±è´¥ï¼Œè¯·ç¡®è®¤RioShiina.iniä¸­DecodeBinå±æ€§æ˜¯å¦æœ‰å€¼\n");
 			system("pause");
 			exit(0);
 		}
@@ -246,7 +247,7 @@ void Init()
 		src = _wfopen(filePath, L"rb");
 		if (src == NULL)
 		{
-			wprintf(L"³õÊ¼»¯Ê§°Ü£¬ÇëÈ·ÈÏÄ¿Â¼ÏÂÊÇ·ñº¬ÓĞ%ls\n", filePath);
+			wprintf(L"åˆå§‹åŒ–å¤±è´¥ï¼Œè¯·ç¡®è®¤ç›®å½•ä¸‹æ˜¯å¦å«æœ‰%ls\n", filePath);
 			system("pause");
 			exit(0);
 		}
@@ -259,7 +260,7 @@ void Init()
 		GetPrivateProfileStringW(L"RioShiina", L"Extra", L"", filePath, MAX_PATH, iniPath);
 		if (wcscmp(filePath, L"") == 0)
 		{
-			wprintf(L"³õÊ¼»¯Ê§°Ü£¬ÇëÈ·ÈÏRioShiina.iniÖĞExtraÊôĞÔÊÇ·ñÓĞÖµ\n");
+			wprintf(L"åˆå§‹åŒ–å¤±è´¥ï¼Œè¯·ç¡®è®¤RioShiina.iniä¸­Extraå±æ€§æ˜¯å¦æœ‰å€¼\n");
 			system("pause");
 			exit(0);
 		}
@@ -267,7 +268,7 @@ void Init()
 		src = _wfopen(filePath, L"rb");
 		if (src == NULL)
 		{
-			wprintf(L"³õÊ¼»¯Ê§°Ü£¬ÇëÈ·ÈÏÄ¿Â¼ÏÂÊÇ·ñº¬ÓĞ%ls\n", filePath);
+			wprintf(L"åˆå§‹åŒ–å¤±è´¥ï¼Œè¯·ç¡®è®¤ç›®å½•ä¸‹æ˜¯å¦å«æœ‰%ls\n", filePath);
 			system("pause");
 			exit(0);
 		}
@@ -557,7 +558,7 @@ void decrypt_helper4(unit8 *data)
 	SYSTEMTIME sys_time;
 	if (!FileTimeToSystemTime(&ft, &sys_time))
 	{
-		printf("decrypt_helper4ÖĞFileTimeToSystemTimeÊ§°Ü!\n");
+		printf("decrypt_helper4ä¸­FileTimeToSystemTimeå¤±è´¥!\n");
 		system("pause");
 		exit(0);
 	}
@@ -579,7 +580,7 @@ void decrypt_helper4(unit8 *data)
 
 char *WARC_key_string(unit32 WARC_version)
 {
-	char *key = "Crypt Type %s - Copyright(C) 2000 Y.Yamada/STUDIO ‚æ‚µ‚­‚ñ";//¤è¤·¤¯¤ó
+	char *key = "Crypt Type %s - Copyright(C) 2000 Y.Yamada/STUDIO å‚›åŸå”å‚«";//ã‚ˆã—ãã‚“
 
 	if (WARC_version <= 120)
 		sprintf(WARC_key, key, "20000823");
@@ -649,7 +650,7 @@ void decrypt(unit32 WARC_version, unit8 *cipher, unit32 cipher_length)
 				fac = Image[idx & 0xff];
 			else
 			{
-				printf("²»Ö§³ÖµÄWARC°æ±¾! WARC_version:%d\n", WARC_version);
+				printf("ä¸æ”¯æŒçš„WARCç‰ˆæœ¬! WARC_version:%d\n", WARC_version);
 				system("pause");
 				exit(0);
 			}
@@ -742,13 +743,13 @@ void ReadIndex(char *fname)
 	if (strncmp(WARC_Header.magic, "WARC 1.7", 8) == 0)
 	{
 		fread(&WARC_Header.index_offset, 4, 1, src);
-		WARC_Header.index_offset ^= 0xF182AD82;//¤¯¤ó
+		WARC_Header.index_offset ^= 0xF182AD82;//ãã‚“
 		fseek(src, 0, SEEK_END);
 		filesize = ftell(src);
 		printf("%s WARC 1.7 index_offset:0x%X filesize:0x%X\n\n", fname, WARC_Header.index_offset, filesize);
 		if (WARC_Header.index_offset > filesize)
 		{
-			printf("index_offset¹ı´ó£¡index_offset:0x%X\n", WARC_Header.index_offset);
+			printf("index_offsetè¿‡å¤§ï¼index_offset:0x%X\n", WARC_Header.index_offset);
 			system("pause");
 			exit(0);
 		}
@@ -764,7 +765,7 @@ void ReadIndex(char *fname)
 			data[i] ^= (unit8)~170;
 		if (data[8] != 0x78)
 		{
-			printf("Ë÷ÒıÎ´¾­¹ızlibÑ¹Ëõ£¬Ôİ²»Ö§³Ö´ËÀàĞÍ!\n");
+			printf("ç´¢å¼•æœªç»è¿‡zlibå‹ç¼©ï¼Œæš‚ä¸æ”¯æŒæ­¤ç±»å‹!\n");
 			fclose(src);
 			free(data);
 			system("pause");
@@ -785,7 +786,7 @@ void ReadIndex(char *fname)
 	}
 	else
 	{
-		printf("²»Ö§³ÖµÄÎÄ¼şÀàĞÍ£¬ÇëÈ·ÈÏÎÄ¼şÍ·ÎªWARC 1.7\n");
+		printf("ä¸æ”¯æŒçš„æ–‡ä»¶ç±»å‹ï¼Œè¯·ç¡®è®¤æ–‡ä»¶å¤´ä¸ºWARC 1.7\n");
 		system("pause");
 		exit(0);
 	}
@@ -808,7 +809,7 @@ void UnpackFile(char *fname)
 	for (i = 0; i < FileNum; i++)
 	{
 		sprintf(dstname, "%04d_%s", i, WARC_Info[i].name);
-		//ÄÇÖÖÈßÓàµÄ¡¢Ã»ÓÃµÄÎÄ¼şµÄÎÄ¼şÃû»á°üº¬°ë½ÇÆ½¼ÙÆ¬¼Ù£¬¿ÉÒÔ²»½â°ü³öÀ´£¬µ«µ¼³öµÄ»°¾ÍÒª¿í×Ö½ÚÁË
+		//é‚£ç§å†—ä½™çš„ã€æ²¡ç”¨çš„æ–‡ä»¶çš„æ–‡ä»¶åä¼šåŒ…å«åŠè§’å¹³å‡ç‰‡å‡ï¼Œå¯ä»¥ä¸è§£åŒ…å‡ºæ¥ï¼Œä½†å¯¼å‡ºçš„è¯å°±è¦å®½å­—èŠ‚äº†
 		dsize = MultiByteToWideChar(932, 0, dstname, strlen(dstname), NULL, 0);
 		MultiByteToWideChar(932, 0, dstname, strlen(dstname), wdstname, dsize);
 		wdstname[dsize] = L'\0';
@@ -873,13 +874,13 @@ void UnpackFile(char *fname)
 			{
 				printf("type:YLZ");
 				free(cdata);
-				printf("Î´Ìí¼ÓYLZ½âÑ¹²¿·Ö!\n");
+				printf("æœªæ·»åŠ YLZè§£å‹éƒ¨åˆ†!\n");
 				system("pause");
 			}
 			else
 			{
 				printf("type:nocompress");
-				sig ^= (uncomprlen ^ 0x82AD82) & 0xFFFFFF;//Î´Ñ¹Ëõ£¬»¹Ô­»ØÈ¥
+				sig ^= (uncomprlen ^ 0x82AD82) & 0xFFFFFF;//æœªå‹ç¼©ï¼Œè¿˜åŸå›å»
 				dst = _wfopen(wdstname, L"wb");
 				fwrite(&sig, 4, 1, dst);
 				fwrite(&uncomprlen, 4, 1, dst);
@@ -896,11 +897,11 @@ void UnpackFile(char *fname)
 int main(int argc, char *argv[])
 {
 	setlocale(LC_ALL, "chs");
-	printf("project£ºNiflheim-RioShiina\nÓÃÓÚ½â°üÎÄ¼şÍ·ÎªWARC 1.7µÄWARÎÄ¼ş¡£\n½«warÎÄ¼şÍÏµ½³ÌĞòÉÏ¡£\nby Darkness-TX 2018.05.03\n\n");
+	printf("projectï¼šNiflheim-RioShiina\nç”¨äºè§£åŒ…æ–‡ä»¶å¤´ä¸ºWARC 1.7çš„WARæ–‡ä»¶ã€‚\nå°†waræ–‡ä»¶æ‹–åˆ°ç¨‹åºä¸Šã€‚\nby Darkness-TX 2018.05.03\n\n");
 	ReadIndex(argv[1]);
 	Init();
 	UnpackFile(argv[1]);
-	printf("ÒÑÍê³É£¬×ÜÎÄ¼şÊı%d\n", FileNum);
+	printf("å·²å®Œæˆï¼Œæ€»æ–‡ä»¶æ•°%d\n", FileNum);
 	system("pause");
 	return 0;
 }
